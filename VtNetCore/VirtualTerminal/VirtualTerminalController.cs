@@ -13,11 +13,11 @@
     /// </summary>
     public class VirtualTerminalController : IVirtualTerminalController
     {
-        private TerminalLines alternativeBuffer = new TerminalLines();
-        private TerminalLines normalBuffer = new TerminalLines();
+        private TerminalLines _alternativeBuffer = new TerminalLines();
+        private TerminalLines _normalBuffer = new TerminalLines();
 
-        private int alternativeBufferTopRow = 0;
-        private int normalBufferTopRow = 0;
+        private int _alternativeBufferTopRow = 0;
+        private int _normalBufferTopRow = 0;
 
         /// <summary>
         /// Configures the maximum number of lines stored in the history
@@ -267,15 +267,15 @@
             get
             {
                 return
-                    "TopRow: " + TopRow.ToString() + "\n" +
-                    "Columns: " + Columns.ToString() + "\n" +
-                    "Rows: " + Rows.ToString() + "\n" +
-                    "VisibleColumns: " + VisibleColumns.ToString() + "\n" +
-                    "VisibleRows: " + VisibleRows.ToString() + "\n" +
-                    "HighlightMouseTracking: " + HighlightMouseTracking.ToString() + "\n" +
-                    "CellMotionMouseTracking: " + CellMotionMouseTracking.ToString() + "\n" +
-                    "SgrMouseMode: " + SgrMouseMode.ToString() + "\n" +
-                    "CursorState: " + "\n" + CursorState.ToString()
+                    "TopRow: " + TopRow + "\n" +
+                    "Columns: " + Columns + "\n" +
+                    "Rows: " + Rows + "\n" +
+                    "VisibleColumns: " + VisibleColumns + "\n" +
+                    "VisibleRows: " + VisibleRows + "\n" +
+                    "HighlightMouseTracking: " + HighlightMouseTracking + "\n" +
+                    "CellMotionMouseTracking: " + CellMotionMouseTracking + "\n" +
+                    "SgrMouseMode: " + SgrMouseMode + "\n" +
+                    "CursorState: " + "\n" + CursorState
                     ;
             }
         }
@@ -285,7 +285,7 @@
         /// </summary>
         public VirtualTerminalController()
         {
-            Buffer = normalBuffer;
+            Buffer = _normalBuffer;
             ViewPort = new VirtualTerminalViewPort(this);
         }
 
@@ -437,7 +437,7 @@
             if (line.Count <= x)
                 return " ";
 
-            return line[x].Char.ToString() + line[x].CombiningCharacters;
+            return line[x].Char + line[x].CombiningCharacters;
         }
 
         /// <summary>
@@ -794,9 +794,9 @@
         /// </remark>
         public void FullReset()
         {
-            alternativeBufferTopRow = alternativeBuffer.Count;
-            normalBufferTopRow = normalBuffer.Count;
-            TopRow = normalBufferTopRow;
+            _alternativeBufferTopRow = _alternativeBuffer.Count;
+            _normalBufferTopRow = _normalBuffer.Count;
+            TopRow = _normalBufferTopRow;
             Vt52Mode = false;
 
             ActiveBuffer = EActiveBuffer.Normal;
@@ -851,13 +851,13 @@
             if (Debugging)
             {
                 //System.Diagnostics.Debug.WriteLine("Terminal: (c=" + CursorState.CurrentColumn.ToString() + ",r=" + CursorState.CurrentRow.ToString() + ")" + message);
-                OnLog?.Invoke(this, new TextEventArgs { Text = "Terminal: (c = " + CursorState.CurrentColumn.ToString() + ", r = " + CursorState.CurrentRow.ToString() + ")" + message });
+                OnLog?.Invoke(this, new TextEventArgs { Text = "Terminal: (c = " + CursorState.CurrentColumn + ", r = " + CursorState.CurrentRow + ")" + message });
             }
         }
 
         public void SetCharacterSet(ECharacterSet characterSet, ECharacterSetMode mode)
         {
-            LogController("SetCharacterSet(characterSet:" + characterSet.ToString() + ")");
+            LogController("SetCharacterSet(characterSet:" + characterSet + ")");
 
             switch (mode)
             {
@@ -888,7 +888,7 @@
         public void TabSet()
         {
             var stop = CursorState.CurrentColumn;
-            LogController("TabSet() [cursorX=" + stop.ToString() + "]");
+            LogController("TabSet() [cursorX=" + stop + "]");
 
             var tabStops = CursorState.TabStops;
             int index = 0;
@@ -904,7 +904,7 @@
         public void Tab()
         {
             var current = CursorState.CurrentColumn;
-            LogController("Tab() [cursorX=" + current.ToString() + "]");
+            LogController("Tab() [cursorX=" + current + "]");
 
             if (StoreRawText)
             {
@@ -931,7 +931,7 @@
         public void ReverseTab()
         {
             var current = CursorState.CurrentColumn;
-            LogController("ReverseTab() [cursorX=" + current.ToString() + "]");
+            LogController("ReverseTab() [cursorX=" + current + "]");
 
             var tabStops = CursorState.TabStops;
             int index = tabStops.Count - 1;
@@ -953,7 +953,7 @@
         {
             var stop = CursorState.CurrentColumn;
 
-            LogController("ClearTab() [cursorX=" + stop.ToString() + "]");
+            LogController("ClearTab() [cursorX=" + stop + "]");
 
             var tabStops = CursorState.TabStops;
             int index = 0;
@@ -974,7 +974,7 @@
 
         private void FillVisualRect(int x1, int y1, int x2, int y2, char ch, TerminalAttribute attr)
         {
-            LogController("FillVisualRect(x1:" + x1.ToString() + ",y1:" + y1.ToString() + ",x2:" + x2.ToString() + ",y2:" + y2.ToString() + ")");
+            LogController("FillVisualRect(x1:" + x1 + ",y1:" + y1 + ",x2:" + x2 + ",y2:" + y2 + ")");
 
             for (var y = y1; y <= y2; y++)
                 for (var x = x1; x <= x2; x++)
@@ -1007,7 +1007,7 @@
         public bool IsProtected(int row, int column)
         {
             var character = GetCharacterAt(row, column);
-            return character == null ? false : (character.Attributes.Protected == 1);
+            return character != null && (character.Attributes.Protected == 1);
         }
 
         /// <summary>
@@ -1076,7 +1076,7 @@
         /// <param name="count">The number of rows to scroll. Positive scrolls up, negative scrolls down</param>
         private void ScrollVisualRect(int x1, int y1, int x2, int y2, int count)
         {
-            LogController("ScrollVisualRect(x1:" + x1.ToString() + ",y1:" + y1.ToString() + ",x2:" + x2.ToString() + ",y2:" + y2.ToString() + ",count:" + count.ToString() + ")");
+            LogController("ScrollVisualRect(x1:" + x1 + ",y1:" + y1 + ",x2:" + x2 + ",y2:" + y2 + ",count:" + count + ")");
 
             if (count == 0)
                 return;
@@ -1162,7 +1162,7 @@
         /// <param name="count">The number of columns to scroll. Positive scrolls right, negative scrolls left</param>
         private void ScrollVisualRectAcross(int x1, int y1, int x2, int y2, int count)
         {
-            LogController("ScrollVisualRectAcross(x1:" + x1.ToString() + ",y1:" + y1.ToString() + ",x2:" + x2.ToString() + ",y2:" + y2.ToString() + ",count:" + count.ToString() + ")");
+            LogController("ScrollVisualRectAcross(x1:" + x1 + ",y1:" + y1 + ",x2:" + x2 + ",y2:" + y2 + ",count:" + count + ")");
 
             if (count == 0)
                 return;
@@ -1257,7 +1257,7 @@
 
                 if (ScrollBottom == -1 && CursorState.CurrentRow >= VisibleRows)
                 {
-                    LogController("Scroll all (before:" + TopRow.ToString() + ",after:" + (TopRow + 1).ToString() + ")");
+                    LogController("Scroll all (before:" + TopRow + ",after:" + (TopRow + 1) + ")");
                     TopRow++;
                     CursorState.CurrentRow--;
 
@@ -1405,7 +1405,7 @@
 
         public void MoveCursorRelative(int x, int y)
         {
-            LogController("MoveCursorRelative(x:" + x.ToString() + ",y:" + y.ToString() + ",vis:[" + VisibleColumns.ToString() + "," + VisibleRows.ToString() + "]" + ")");
+            LogController("MoveCursorRelative(x:" + x + ",y:" + y + ",vis:[" + VisibleColumns + "," + VisibleRows + "]" + ")");
 
             CursorState.CurrentRow += y;
             if (CursorState.CurrentRow < ScrollTop)
@@ -1426,7 +1426,7 @@
 
         public void SetCursorPosition(int column, int row)
         {
-            LogController("SetCursorPosition(column:" + column.ToString() + ",row:" + row.ToString() + ")");
+            LogController("SetCursorPosition(column:" + column + ",row:" + row + ")");
 
             CursorState.CurrentRow = row - 1 + (CursorState.OriginMode ? ScrollTop : 0);
             if (CursorState.CurrentRow < 0)
@@ -1461,7 +1461,7 @@
 
         public void InsertBlanks(int count)
         {
-            LogController("InsertBlank(count:" + count.ToString() + ")");
+            LogController("InsertBlank(count:" + count + ")");
 
             InsertBlanks(count, TopRow + CursorState.CurrentRow);
 
@@ -1470,7 +1470,7 @@
 
         public void EraseCharacter(int count)
         {
-            LogController("EraseCharacter(count:" + count.ToString() + ")");
+            LogController("EraseCharacter(count:" + count + ")");
 
             for (var i = 0; i < count; i++)
                 SetCharacter(CursorState.CurrentColumn + i, CursorState.CurrentRow, ' ', CursorState.Attributes);
@@ -1478,7 +1478,7 @@
 
         public void DeleteCharacter(int count)
         {
-            LogController("DeleteCharacter(count:" + count.ToString() + ")");
+            LogController("DeleteCharacter(count:" + count + ")");
 
             DeleteCharacter(count, CursorState.CurrentRow + TopRow);
 
@@ -1493,7 +1493,7 @@
 
         public void RepeatLastCharacter(int count)
         {
-            LogController("RepeatLastCharacter(count:" + count.ToString() + ")");
+            LogController("RepeatLastCharacter(count:" + count + ")");
 
             if (LastCharacter == null)
             {
@@ -1520,7 +1520,7 @@
 
         public void PutChar(char character)
         {
-            LogExtreme("PutChar(ch:'" + character + "'=" + ((int)character).ToString() + ")");
+            LogExtreme("PutChar(ch:'" + character + "'=" + ((int)character) + ")");
 
             if (!CursorState.Utf8 && IsRGrCharacter(character))
                 character = Iso2022Encoding.DecodeChar((char)(character - (char)0x80), RightCharacterSet);
@@ -1596,7 +1596,7 @@
 
         public void PutG2Char(char character)
         {
-            LogExtreme("PutG2Char(ch:'" + character + "'=" + ((int)character).ToString() + ")");
+            LogExtreme("PutG2Char(ch:'" + character + "'=" + ((int)character) + ")");
 
             var oldUtf8 = CursorState.Utf8;
             var oldMode = CursorState.CharacterSetMode;
@@ -1610,7 +1610,7 @@
 
         public void PutG3Char(char character)
         {
-            LogExtreme("PutG3Char(ch:'" + character + "'=" + ((int)character).ToString() + ")");
+            LogExtreme("PutG3Char(ch:'" + character + "'=" + ((int)character) + ")");
 
             var oldMode = CursorState.CharacterSetMode;
             CursorState.CharacterSetMode = ECharacterSetMode.IsoG3;
@@ -1643,14 +1643,14 @@
 
         public void InvokeCharacterSetMode(ECharacterSetMode mode)
         {
-            LogController("InvokeCharacterSetMode(mode: " + mode.ToString() + ")");
+            LogController("InvokeCharacterSetMode(mode: " + mode + ")");
 
             CursorState.CharacterSetMode = mode;
         }
 
         public void InvokeCharacterSetModeR(ECharacterSetMode mode)
         {
-            LogController("InvokeCharacterSetModeR(mode: " + mode.ToString() + ")");
+            LogController("InvokeCharacterSetModeR(mode: " + mode + ")");
 
             CursorState.Utf8 = false;
             CursorState.CharacterSetModeR = mode;
@@ -1789,7 +1789,7 @@
                 case 38:
                     CursorState.Attributes.ForegroundRgb = null;
                     CursorState.Attributes.ForegroundColor = (ETerminalColor)(parameter - 30);
-                    LogController("SetCharacterAttribute(foreground:" + CursorState.Attributes.ForegroundColor.ToString() + ")");
+                    LogController("SetCharacterAttribute(foreground:" + CursorState.Attributes.ForegroundColor + ")");
                     break;
                 case 39:
                     CursorState.Attributes.ForegroundRgb = null;
@@ -1807,7 +1807,7 @@
                 case 48:
                     CursorState.Attributes.BackgroundRgb = null;
                     CursorState.Attributes.BackgroundColor = (ETerminalColor)(parameter - 40);
-                    LogController("SetCharacterAttribute(background:" + CursorState.Attributes.BackgroundColor.ToString() + ")");
+                    LogController("SetCharacterAttribute(background:" + CursorState.Attributes.BackgroundColor + ")");
                     break;
                 case 49:
                     CursorState.Attributes.BackgroundRgb = null;
@@ -1824,7 +1824,7 @@
                 case 96:
                 case 97:
                     CursorState.Attributes.ForegroundRgb = new TerminalColor((ETerminalColor)(parameter - 90), true);
-                    LogController("SetCharacterAttribute(foregroundRgb:" + CursorState.Attributes.ForegroundRgb.ToString() + ")");
+                    LogController("SetCharacterAttribute(foregroundRgb:" + CursorState.Attributes.ForegroundRgb + ")");
                     break;
 
                 case 100:
@@ -1836,7 +1836,7 @@
                 case 106:
                 case 107:
                     CursorState.Attributes.BackgroundRgb = new TerminalColor((ETerminalColor)(parameter - 100), true);
-                    LogController("SetCharacterAttribute(backgroundRgb:" + CursorState.Attributes.BackgroundRgb.ToString() + ")");
+                    LogController("SetCharacterAttribute(backgroundRgb:" + CursorState.Attributes.BackgroundRgb + ")");
                     break;
 
                 default:
@@ -1847,7 +1847,7 @@
 
         public void SetCharacterSize(ECharacterSize size)
         {
-            LogController("SetCharacterSize(size:" + size.ToString() + ")");
+            LogController("SetCharacterSize(size:" + size + ")");
 
             while ((CursorState.CurrentRow + TopRow) >= Buffer.Count)
                 Buffer.Add(new TerminalLine());
@@ -1896,7 +1896,7 @@
 
             SavedCursorState = CursorState.Clone();
 
-            LogController("     C=" + CursorState.CurrentColumn.ToString() + ",R=" + CursorState.CurrentRow.ToString());
+            LogController("     C=" + CursorState.CurrentColumn + ",R=" + CursorState.CurrentRow);
         }
 
         public void RestoreCursor()
@@ -1906,7 +1906,7 @@
             if (SavedCursorState != null)
                 CursorState = SavedCursorState.Clone();
 
-            LogController("     C=" + CursorState.CurrentColumn.ToString() + ",R=" + CursorState.CurrentRow.ToString());
+            LogController("     C=" + CursorState.CurrentColumn + ",R=" + CursorState.CurrentRow);
         }
 
         public void EnableNormalBuffer()
@@ -1917,10 +1917,10 @@
                 return;
 
             ActiveBuffer = EActiveBuffer.Normal;
-            Buffer = normalBuffer;
+            Buffer = _normalBuffer;
 
-            alternativeBufferTopRow = TopRow;
-            TopRow = normalBufferTopRow;
+            _alternativeBufferTopRow = TopRow;
+            TopRow = _normalBufferTopRow;
 
             ChangeCount++;
         }
@@ -1933,24 +1933,24 @@
                 return;
 
             ActiveBuffer = EActiveBuffer.Alternative;
-            Buffer = alternativeBuffer;
+            Buffer = _alternativeBuffer;
 
-            normalBufferTopRow = TopRow;
-            TopRow = alternativeBufferTopRow;
+            _normalBufferTopRow = TopRow;
+            TopRow = _alternativeBufferTopRow;
 
             ChangeCount++;
         }
 
         public void UseHighlightMouseTracking(bool enable)
         {
-            LogController("Unimplemented: UseHighlightMouseTracking(enable:" + enable.ToString() + ")");
+            LogController("Unimplemented: UseHighlightMouseTracking(enable:" + enable + ")");
             HighlightMouseTracking = enable;
             ChangeCount++;
         }
 
         public void UseCellMotionMouseTracking(bool enable)
         {
-            LogController("UseCellMotionMouseTracking(enable:" + enable.ToString() + ")");
+            LogController("UseCellMotionMouseTracking(enable:" + enable + ")");
             CellMotionMouseTracking = enable;
             if(enable)
             {
@@ -1967,7 +1967,7 @@
 
         public void EnableSgrMouseMode(bool enable)
         {
-            LogController("EnableSgrMouseMode(enable:" + enable.ToString() + ")");
+            LogController("EnableSgrMouseMode(enable:" + enable + ")");
             SgrMouseMode = enable;
             if (enable)
             {
@@ -1986,7 +1986,7 @@
 
         public void EnableUrxvtMouseMode(bool enabled)
         {
-            LogController("EnableUrxvtMouseMode(enabled:" + enabled.ToString() + ")");
+            LogController("EnableUrxvtMouseMode(enabled:" + enabled + ")");
             UrxvtMouseMode = enabled;
 
             if(enabled)
@@ -2041,7 +2041,7 @@
 
         public void SetBracketedPasteMode(bool enable)
         {
-            LogController("SetBracketedPasteMode(enable:" + enable.ToString() + ")");
+            LogController("SetBracketedPasteMode(enable:" + enable + ")");
             BracketedPasteMode = enable;
         }
 
@@ -2057,7 +2057,7 @@
 
         public void SetInsertReplaceMode(EInsertReplaceMode mode)
         {
-            LogController("SetInsertReplaceMode(mode:" + mode.ToString() + ")");
+            LogController("SetInsertReplaceMode(mode:" + mode + ")");
             CursorState.InsertMode = mode;
         }
 
@@ -2070,13 +2070,13 @@
 
         public void SetAutomaticNewLine(bool enable)
         {
-            LogController("SetAutomaticNewLine(enable:" + enable.ToString() + ")");
+            LogController("SetAutomaticNewLine(enable:" + enable + ")");
             CursorState.AutomaticNewLine = enable;
         }
 
         public void EnableApplicationCursorKeys(bool enable)
         {
-            LogController("EnableApplicationCursorKeys(enable:" + enable.ToString() + ")");
+            LogController("EnableApplicationCursorKeys(enable:" + enable + ")");
             CursorState.ApplicationCursorKeysMode = enable;
         }
 
@@ -2092,12 +2092,12 @@
 
         public void SetKeypadType(EKeypadType type)
         {
-            LogController("Unimplemented: SetKeypadType(type:" + type.ToString() + ")");
+            LogController("Unimplemented: SetKeypadType(type:" + type + ")");
         }
 
         public void SetScrollingRegion(int top, int bottom)
         {
-            LogController("SetScrollingRegion(top:" + top.ToString() + ",bottom:" + bottom.ToString() + ")");
+            LogController("SetScrollingRegion(top:" + top + ",bottom:" + bottom + ")");
 
             if (bottom < top)
                 return;
@@ -2116,7 +2116,7 @@
 
         public void SetLeftAndRightMargins(int left, int right)
         {
-            LogController("SetLeftAndRightMargins(left:" + left.ToString() + ",right:" + right.ToString() + ")");
+            LogController("SetLeftAndRightMargins(left:" + left + ",right:" + right + ")");
 
             if (!LeftAndRightMarginEnabled)
                 return;
@@ -2224,7 +2224,7 @@
         public void DeleteLines(int count)
         {
             // TODO : Verify it works with scroll range
-            LogController("DeleteLines(count:" + count.ToString() + ")");
+            LogController("DeleteLines(count:" + count + ")");
 
             if (
                 CursorState.CurrentRow < ScrollTop ||
@@ -2277,7 +2277,7 @@
 
         private void InsertBlanks(int count, int row)
         {
-            LogController("InsertBlank(count:" + count.ToString() + ")");
+            LogController("InsertBlank(count:" + count + ")");
 
             if (
                 LeftAndRightMarginEnabled &&
@@ -2310,7 +2310,7 @@
 
         public void DeleteCharacter(int count, int row)
         {
-            LogController("DeleteCharacter(count:" + count.ToString() + ", row:" + row.ToString() + ")");
+            LogController("DeleteCharacter(count:" + count + ", row:" + row + ")");
 
             if (
                 LeftAndRightMarginEnabled &&
@@ -2353,7 +2353,7 @@
 
         public void InsertColumn(int count)
         {
-            LogController("InsertColumn(count:" + count.ToString() + ")");
+            LogController("InsertColumn(count:" + count + ")");
 
             if (
                 CursorState.CurrentRow < ScrollTop ||
@@ -2386,7 +2386,7 @@
 
         public void DeleteColumn(int count)
         {
-            LogController("InsertColumn(count:" + count.ToString() + ")");
+            LogController("InsertColumn(count:" + count + ")");
 
             if (
                 CursorState.CurrentRow < ScrollTop ||
@@ -2419,7 +2419,7 @@
 
         public void InsertLines(int count)
         {
-            LogController("InsertLines(count:" + count.ToString() + ")");
+            LogController("InsertLines(count:" + count + ")");
 
             if (
                 CursorState.CurrentRow < ScrollTop ||
@@ -2500,7 +2500,7 @@
 
         public void Enable132ColumnMode(bool enable)
         {
-            LogController("Enable132ColumnMode(enable:" + enable.ToString() + ")");
+            LogController("Enable132ColumnMode(enable:" + enable + ")");
             EraseAll();
             Columns = enable ? 132 : 80;
             CursorState.ConfiguredColumns = Columns;
@@ -2509,13 +2509,13 @@
 
         public void EnableSmoothScrollMode(bool enable)
         {
-            LogController("Unimplemented: EnableSmoothScrollMode(enable:" + enable.ToString() + ")");
+            LogController("Unimplemented: EnableSmoothScrollMode(enable:" + enable + ")");
             SmoothScrollMode = enable;
         }
 
         public void EnableReverseVideoMode(bool enable)
         {
-            LogController("EnableReverseVideoMode(enable:" + enable.ToString() + ")");
+            LogController("EnableReverseVideoMode(enable:" + enable + ")");
             CursorState.ReverseVideoMode = enable;
 
             ChangeCount++;
@@ -2523,7 +2523,7 @@
 
         public void EnableBlinkingCursor(bool enable)
         {
-            LogController("EnableBlinkingCursor(enable:" + enable.ToString() + ")");
+            LogController("EnableBlinkingCursor(enable:" + enable + ")");
             CursorState.BlinkingCursor = enable;
 
             ChangeCount++;
@@ -2531,7 +2531,7 @@
 
         public void ShowCursor(bool show)
         {
-            LogController("ShowCursor(show:" + show.ToString() + ")");
+            LogController("ShowCursor(show:" + show + ")");
             CursorState.ShowCursor = show;
 
             ChangeCount++;
@@ -2539,37 +2539,37 @@
 
         public void EnableOriginMode(bool enable)
         {
-            LogController("EnableOriginMode(enable:" + enable.ToString() + ")");
+            LogController("EnableOriginMode(enable:" + enable + ")");
             CursorState.OriginMode = enable;
             SetCursorPosition(1, 1);
         }
 
         public void EnableWrapAroundMode(bool enable)
         {
-            LogController("EnableWrapAroundMode(enable:" + enable.ToString() + ")");
+            LogController("EnableWrapAroundMode(enable:" + enable + ")");
             CursorState.WordWrap = enable;
         }
 
         public void EnableAutoRepeatKeys(bool enable)
         {
-            LogController("Unimplemented: EnableAutoRepeatKeys(enable:" + enable.ToString() + ")");
+            LogController("Unimplemented: EnableAutoRepeatKeys(enable:" + enable + ")");
         }
 
         public void Enable80132Mode(bool enable)
         {
-            LogController("Unimplemented: Enable80132Mode(enable:" + enable.ToString() + ")");
+            LogController("Unimplemented: Enable80132Mode(enable:" + enable + ")");
             Columns = VisibleColumns;
         }
 
         public void EnableReverseWrapAroundMode(bool enable)
         {
-            LogController("Unimplemented: EnableReverseWrapAroundMode(enable:" + enable.ToString() + ")");
+            LogController("Unimplemented: EnableReverseWrapAroundMode(enable:" + enable + ")");
             ReverseWrapAroundMode = enable;
         }
 
         public void EnableLeftAndRightMarginMode(bool enable)
         {
-            LogController("EnableLeftAndRightMarginMode(enable:" + enable.ToString() + ")");
+            LogController("EnableLeftAndRightMarginMode(enable:" + enable + ")");
 
             if (LeftAndRightMarginEnabled != enable)
             {
@@ -2610,7 +2610,7 @@
         {
             LogController("ReportCursorPosition()");
 
-            var rcp = "\u001b[" + (CursorState.CurrentRow - ScrollTop + 1).ToString() + ";" + (CursorState.CurrentColumn - LeftMargin + 1).ToString() + "R";
+            var rcp = "\u001b[" + (CursorState.CurrentRow - ScrollTop + 1) + ";" + (CursorState.CurrentColumn - LeftMargin + 1) + "R";
 
             SendData.Invoke(this, new SendDataEventArgs { Data = Encoding.UTF8.GetBytes(rcp) });
         }
@@ -2619,7 +2619,7 @@
         {
             LogController("ReportExtendedCursorPosition()");
 
-            var rcp = "\u001b[?" + (CursorState.CurrentRow - ScrollTop + 1).ToString() + ";" + (CursorState.CurrentColumn - LeftMargin + 1).ToString() + "R";
+            var rcp = "\u001b[?" + (CursorState.CurrentRow - ScrollTop + 1) + ";" + (CursorState.CurrentColumn - LeftMargin + 1) + "R";
 
             SendData.Invoke(this, new SendDataEventArgs { Data = Encoding.UTF8.GetBytes(rcp) });
         }
@@ -2751,14 +2751,14 @@
         private static byte [] DecPrivateModeResponse(int mode, bool response, bool always=false)
         {
             return Encoding.ASCII.GetBytes(
-                    "\u001b[?" + mode.ToString() + ";" + ((always && !response) ? "4" : (response ? "1" : "2")) + "$y"
+                    "\u001b[?" + mode + ";" + ((always && !response) ? "4" : (response ? "1" : "2")) + "$y"
                 );
         }
 
         private static byte[] DecUnknownPrivateModeResponse(int mode)
         {
             return Encoding.ASCII.GetBytes(
-                    "\u001b[?" + mode.ToString() + ";0$y"
+                    "\u001b[?" + mode + ";0$y"
                 );
         }
 
@@ -2918,7 +2918,7 @@
 
         public void RequestDecPrivateMode(int mode)
         {
-            LogController("RequestDecPrivateMode(mode:" + mode.ToString() + ")");
+            LogController("RequestDecPrivateMode(mode:" + mode + ")");
 
             switch (mode)
             {
@@ -3135,7 +3135,7 @@
                     (controlPressed ? 16 : 0) |
                     (shiftPressed ? 4 : 0);
 
-                var message = "\u001b[<" + modifier.ToString() + ";" + (x + 1).ToString() + ";" + (y + 1).ToString() + "M";
+                var message = "\u001b[<" + modifier + ";" + (x + 1) + ";" + (y + 1) + "M";
 
                 SendData.Invoke(this,
                     new SendDataEventArgs
@@ -3183,7 +3183,7 @@
                     (controlPressed ? 16 : 0) |
                     (shiftPressed ? 4 : 0);
 
-                var message = "\u001b[<" + modifier.ToString() + ";" + (x + 1).ToString() + ";" + (y + 1).ToString() + "m";
+                var message = "\u001b[<" + modifier + ";" + (x + 1) + ";" + (y + 1) + "m";
 
                 SendData.Invoke(this,
                     new SendDataEventArgs

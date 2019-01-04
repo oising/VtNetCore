@@ -26,10 +26,7 @@
 
         public override bool Equals(object obj)
         {
-            if (this == null && obj == null)
-                return true;
-
-            if (this == null || obj == null)
+            if (obj == null)
                 return false;
 
             if (ReferenceEquals(this, obj))
@@ -293,18 +290,14 @@
         public override string ToString()
         {
             return
-                "  ForegroundColor: " + ForegroundColor.ToString() + "\n" +
-                "  ForegroundRgb: " + ForegroundRgb == null ? "<null>" : ForegroundRgb.ToString() + "\n" + 
-                "  BackgroundColor: " + BackgroundColor.ToString() + "\n" +
-                "  BackgroundRgb: " + BackgroundRgb == null ? "<null>" : BackgroundRgb.ToString() + "\n" +
-                "  Bright: " + Bright.ToString() + "\n" +
-                "  Standout: " + Standout.ToString() + "\n" +
-                "  Underscore: " + Underscore.ToString() + "\n" +
-                "  Blink: " + Blink.ToString() + "\n" +
-                "  Reverse: " + Reverse.ToString() + "\n" +
-                "  Hidden: " + Hidden.ToString() + "\n" + 
-                "  Protected: " + Protected.ToString() + "\n"
-                ;
+                BackgroundRgb + "\n" +
+                "  Bright: " + Bright + "\n" +
+                "  Standout: " + Standout + "\n" +
+                "  Underscore: " + Underscore + "\n" +
+                "  Blink: " + Blink + "\n" +
+                "  Reverse: " + Reverse + "\n" +
+                "  Hidden: " + Hidden + "\n" + 
+                "  Protected: " + Protected + "\n";
         }
     }
 }

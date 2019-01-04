@@ -27,11 +27,17 @@
                 var next = stream.Read();
 
                 if (atStart && next == '?')
+                {
                     isQuery = true;
+                }
                 else if (atStart && next == '>')
+                {
                     isSend = true;
+                }
                 else if (atStart && next == '!')
+                {
                     isBang = true;
+                }
                 else if (next == ';')
                 {
                     if (currentParameter == -1)
@@ -48,14 +54,20 @@
                 {
                     atStart = false;
                     if (currentParameter == -1)
+                    {
                         currentParameter = Convert.ToInt32(next - '0');
+                    }
                     else
+                    {
                         currentParameter = (currentParameter * 10) + Convert.ToInt32(next - '0');
+                    }
                 }
-                else if (next == '$' || next == '"' || next == ' ' || next =='\'')
+                else if (next == '$' || next == '"' || next == ' ' || next == '\'')
                 {
                     if (modifier.HasValue)
+                    {
                         throw new EscapeSequenceException("There appears to be two modifiers in a row", stream.Stacked);
+                    }
 
                     if (currentParameter != -1)
                     {
@@ -153,15 +165,23 @@
                 else
                 {
                     if (atStart && next == '?')
+                    {
                         isQuery = true;
+                    }
                     else if (atStart && next == '>')
+                    {
                         isSend = true;
+                    }
                     else if (atStart && next == '!')
+                    {
                         isBang = true;
+                    }
                     else if (next == ';')
                     {
                         if (currentParameter == -1)
+                        {
                             throw new EscapeSequenceException("Invalid position for ';' in OSC", stream.Stacked);
+                        }
 
                         Parameters.Add(currentParameter);
                         currentParameter = -1;
@@ -170,14 +190,20 @@
                     {
                         atStart = false;
                         if (currentParameter == -1)
+                        {
                             currentParameter = Convert.ToInt32(next - '0');
+                        }
                         else
+                        {
                             currentParameter = (currentParameter * 10) + Convert.ToInt32(next - '0');
+                        }
                     }
                     else if (next == '$' || next == '"' || next == ' ')
                     {
                         if (modifier.HasValue)
+                        {
                             throw new EscapeSequenceException("There appears to be two modifiers in a row", stream.Stacked);
+                        }
 
                         if (currentParameter != -1)
                         {
@@ -223,7 +249,7 @@
             var next = stream.Read();
 
             ECharacterSize size;
-            switch(next)
+            switch (next)
             {
                 case '3':
                     size = ECharacterSize.DoubleHeightLineTop;
@@ -503,10 +529,10 @@
 
                         return dcs;
                     }
-                    else if(next == 0x1B)               // ESC
+                    else if (next == 0x1B)               // ESC
                     {
                         var stChar = stream.Read();
-                        if(stChar == '\\')
+                        if (stChar == '\\')
                         {
                             var dcs = new DcsSequence
                             {
@@ -524,7 +550,9 @@
                             return dcs;
                         }
                         else
+                        {
                             throw new EscapeSequenceException("ESC \\ is needed to terminate DCS. Encounterd wrong character.", stream.Stacked);
+                        }
                     }
                     else
                     {
@@ -534,15 +562,23 @@
                 else
                 {
                     if (atStart && next == '?')
+                    {
                         isQuery = true;
+                    }
                     else if (atStart && next == '>')
+                    {
                         isSend = true;
+                    }
                     else if (atStart && next == '!')
+                    {
                         isBang = true;
+                    }
                     else if (next == ';')
                     {
                         if (currentParameter == -1)
+                        {
                             throw new EscapeSequenceException("Invalid position for ';' in DCS", stream.Stacked);
+                        }
 
                         Parameters.Add(currentParameter);
                         currentParameter = -1;
@@ -551,14 +587,20 @@
                     {
                         atStart = false;
                         if (currentParameter == -1)
+                        {
                             currentParameter = Convert.ToInt32(next - '0');
+                        }
                         else
+                        {
                             currentParameter = (currentParameter * 10) + Convert.ToInt32(next - '0');
+                        }
                     }
                     else if (next == '$' || next == '"' || next == ' ')
                     {
                         if (modifier.HasValue)
+                        {
                             throw new EscapeSequenceException("There appears to be two modifiers in a row", stream.Stacked);
+                        }
 
                         if (currentParameter != -1)
                         {

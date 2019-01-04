@@ -115,7 +115,7 @@
         {
             get
             {
-                return Buffer == null ? true : (Position >= Buffer.Length);
+                return Buffer == null || (Position >= Buffer.Length);
             }
         }
 
@@ -123,7 +123,7 @@
         {
             get
             {
-                return Buffer == null ? 0 : (Buffer.Length - Position);
+                return Buffer?.Length - Position ?? 0;
             }
         }
 
