@@ -2149,7 +2149,14 @@
             for (var i = CursorState.CurrentColumn; i < Columns; i++)
                 SetCharacter(i, CursorState.CurrentRow, ' ', CursorState.Attributes, ignoreProtected);
 
-            var line = Buffer[TopRow + CursorState.CurrentRow];
+            var index = TopRow + CursorState.CurrentRow;
+
+            if (index >= Buffer.Count)
+            {
+                index = Buffer.Count - 1;
+            }
+
+            var line = Buffer[index];
             while (line.Count > Columns)
                 line.RemoveAt(line.Count - 1);
 
