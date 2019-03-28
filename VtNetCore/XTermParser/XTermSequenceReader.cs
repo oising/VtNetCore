@@ -124,6 +124,11 @@
 
             while (true)
             {
+                if(stream.AtEnd)
+                {
+                    return  null;
+                }
+
                 var next = stream.Read();
 
                 if (readingCommand)
