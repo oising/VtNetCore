@@ -20,7 +20,7 @@
         /// <summary>
         /// The buffer to hold state for processing and parsing of incoming data
         /// </summary>
-        private XTermInputBuffer InputBuffer { get; set; } = new XTermInputBuffer();
+        protected XTermInputBuffer InputBuffer { get; set; } = new XTermInputBuffer();
 
         /// <summary>
         /// State information for when continuing to process data from a previously starved buffer condition
@@ -40,6 +40,21 @@
         {
             Controller = controller;
         }
+
+		public void WriteLine(string text) 
+		{
+			Write(text + Environment.NewLine);
+		}
+
+		public void Write(string text, int start, int length) 
+		{
+			Push(Encoding.UTF8.GetBytes(text.ToCharArray(), start, length));
+		}
+
+		public void Write(string text) 
+		{
+			Push(Encoding.UTF8.GetBytes(text));
+		}
 
         /// <summary>
         /// Consume raw byte data, parse it and then process it through the controller.
